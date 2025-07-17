@@ -11,10 +11,10 @@ ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 -- Toggle Button (Circular)
 local ToggleButton = Instance.new("Frame")
-ToggleButton.Size = UDim2.new(0, 60, 0, 60)
+ToggleButton.Size = UDim2.new(0, 51, 0, 51) -- Reduced by 15% from 60x60
 ToggleButton.Position = UDim2.new(0.05, 0, 0.05, 0)
 ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black background
-ToggleButton.BorderColor3 = Color3.fromRGB(150, 150, 150) -- Gray border
+ToggleButton.BorderColor3 = Color3.fromRGB(200, 0, 0) -- Dark red border (same as text)
 ToggleButton.BorderSizePixel = 2
 ToggleButton.Active = true
 ToggleButton.Draggable = true
@@ -29,8 +29,10 @@ local ToggleLabel = Instance.new("TextLabel")
 ToggleLabel.Size = UDim2.new(1, 0, 1, 0)
 ToggleLabel.BackgroundTransparency = 1
 ToggleLabel.Text = "KrogHub"
-ToggleLabel.TextColor3 = Color3.fromRGB(255, 50, 50) -- Red text
-ToggleLabel.TextSize = 16
+ToggleLabel.TextColor3 = Color3.fromRGB(200, 0, 0) -- Darker red text
+ToggleLabel.TextStrokeColor3 = Color3.fromRGB(200, 200, 200) -- Light gray stroke
+ToggleLabel.TextStrokeTransparency = 0
+ToggleLabel.TextSize = 13.6 -- Reduced by 15% from 16
 ToggleLabel.Font = Enum.Font.SourceSansBold
 ToggleLabel.TextScaled = true
 ToggleLabel.Parent = ToggleButton
@@ -333,67 +335,11 @@ local function categorizeItem(item)
 end
 
 -- Function to update item list based on category
-local function updateItemList(player, category)
-    for _, v in pairs(ItemScroll:GetChildren()) do
-        if v:IsA("TextButton") then
-            v:Destroy()
-        end
-    end
-    local backpack = player:FindFirstChild("Backpack")
-    if backpack then
-        for _, item in pairs(backpack:GetChildren()) do
-            if item:IsA("Tool") and categorizeItem(item) == category then
-                local ItemButton = Instance.new("TextButton")
-                ItemButton.Size = UDim2.new(1, -10, 0, 30)
-                ItemButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-                ItemButton.Text = item.Name
-                ItemButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-                ItemButton.TextSize = 14
-                ItemButton.Font = Enum.Font.SourceSans
-                ItemButton.Parent = ItemScroll
-                local UICornerItemBtn = Instance.new("UICorner")
-                UICornerItemBtn.CornerRadius = UDim.new(0, 5)
-                UICornerItemBtn.Parent = ItemButton
-                ItemButton.MouseButton1Click:Connect(function()
-                    local clonedItem = item:Clone()
-                    makePetVisible(clonedItem)
-                    clonedItem.Parent = LocalPlayer.Backpack
-                end)
-            end
-        end
-    end
-    ItemScroll.CanvasSize = UDim2.new(0, 0, 0, ItemListLayout.AbsoluteContentSize.Y)
-end
+local function updateItemelige
 
--- Function to update player list
-local function updatePlayerList()
-    for _, v in pairs(PlayerScroll:GetChildren()) do
-        if v:IsA("TextButton") then
-            v:Destroy()
-        end
-    end
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            local PlayerButton = Instance.new("TextButton")
-            PlayerButton.Size = UDim2.new(1, -10, 0, 30)
-            PlayerButton.BackgroundColor3 = Color3.fromRGB(60, 80, 100)
-            PlayerButton.Text = player.Name
-            PlayerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-            PlayerButton.TextSize = 14
-            PlayerButton.Font = Enum.Font.SourceSans
-            PlayerButton.Parent = PlayerScroll
-            local UICornerPlayerBtn = Instance.new("UICorner")
-            UICornerPlayerBtn.CornerRadius = UDim.new(0, 5)
-            UICornerPlayerBtn.Parent = PlayerButton
-            PlayerButton.MouseButton1Click:Connect(function()
-                selectedPlayer = player
-                ItemTitle.Text = player.Name .. "'s " .. selectedCategory
-                ItemFrame.Visible = true
-                updateItemList(player, selectedCategory)
-            end)
-        end
-    end
-    PlayerScroll.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+ItemFrame.Visible = false
+MainFrame.Visible = false
+updateItemList(player, selectedCategory)
 end
 
 -- Event Handlers
