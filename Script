@@ -1,7 +1,6 @@
 -- KrogHub Script for Grow a Garden
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
 -- Create GUI
@@ -9,6 +8,31 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "KrogHub"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Toggle Button (Circular)
+local ToggleButton = Instance.new("Frame")
+ToggleButton.Size = UDim2.new(0, 50, 0, 50)
+ToggleButton.Position = UDim2.new(0.05, 0, 0.05, 0)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+ToggleButton.BorderSizePixel = 0
+ToggleButton.Active = true
+ToggleButton.Draggable = true
+ToggleButton.Parent = ScreenGui
+ToggleButton.ClipsDescendants = true
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0.5, 0)
+UICorner.Parent = ToggleButton
+
+local ToggleLabel = Instance.new("TextLabel")
+ToggleLabel.Size = UDim2.new(1, 0, 1, 0)
+ToggleLabel.BackgroundTransparency = 1
+ToggleLabel.Text = "K"
+ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleLabel.TextSize = 20
+ToggleLabel.Font = Enum.Font.SourceSansBold
+ToggleLabel.TextScaled = true
+ToggleLabel.Parent = ToggleButton
 
 -- Main Frame
 local MainFrame = Instance.new("Frame")
@@ -18,6 +42,7 @@ MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
+MainFrame.Visible = false
 MainFrame.Parent = ScreenGui
 
 -- Title Bar
@@ -123,7 +148,40 @@ ItemTitle.Parent = ItemFrame
 local isMinimized = false
 local selectedPlayer = nil
 
--- Functions
+-- Function to make pet models visible when equipped
+local function makePetVisible(tool)
+    if tool:IsA("Tool") then
+        for _, part in pairs(tool:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Transparency = 0
+            elseif part:IsA("Model") then
+                for _, modelPart in pairs(part:GetDescendants()) do
+                    if modelPart:IsA("BasePart") then
+                        modelPart.Transparency = 0
+                    end
+                end
+            end
+        end
+        -- Handle equip event
+        tool.Equipped:Connect(function()
+            for _, part in pairs(tool:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.Transparency = 0
+                end
+            end
+        end)
+        -- Handle unequip event (optional, to reset visibility)
+        tool.Unequipped:Connect(function()
+            for _, part in pairs(tool:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.Transparency = 0 -- Keep visible or adjust as needed
+                end
+            end
+        end)
+    end
+end
+
+-- Function to update player list
 local function updatePlayerList()
     for _, v in pairs(PlayerScroll:GetChildren()) do
         if v:IsA("TextButton") then
@@ -162,6 +220,7 @@ local function updatePlayerList()
                         ItemButton.Parent = ItemScroll
                         ItemButton.MouseButton1Click:Connect(function()
                             local clonedItem = item:Clone()
+                            makePetVisible(clonedItem)
                             clonedItem.Parent = LocalPlayer.Backpack
                         end)
                     end
@@ -174,8 +233,14 @@ local function updatePlayerList()
 end
 
 -- Event Handlers
+ToggleButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        MainFrame.Visible = not MainFrame.Visible
+    end
+end)
+
 CloseButton.MouseButton1Click:Connect(function()
-    ScreenGui.Enabled = false
+    MainFrame.Visible = false
 end)
 
 MinimizeButton.MouseButton1Click:Connect(function()
@@ -191,13 +256,6 @@ RefreshButton.MouseButton1Click:Connect(updatePlayerList)
 
 -- Initial Setup
 updatePlayerList()
-
--- Toggle GUI with Circle Key
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.KeyCode == Enum.KeyCode.Circle then
-        ScreenGui.Enabled = not ScreenGui.Enabled
-    end
-end)
 
 -- Update on player added/removed
 Players.PlayerAdded:Connect(updatePlayerList)
