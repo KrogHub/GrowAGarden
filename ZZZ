@@ -9,13 +9,12 @@ ScreenGui.Name = "KrogHub"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
--- Toggle Button (Circular)
+-- Toggle Button (Minimalistic)
 local ToggleButton = Instance.new("Frame")
-ToggleButton.Size = UDim2.new(0, 51, 0, 51) -- Reduced by 15% from 60x60
+ToggleButton.Size = UDim2.new(0, 40, 0, 40) -- Smaller size for minimalism
 ToggleButton.Position = UDim2.new(0.05, 0, 0.05, 0)
 ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black background
-ToggleButton.BorderColor3 = Color3.fromRGB(200, 0, 0) -- Dark red border (same as text)
-ToggleButton.BorderSizePixel = 2
+ToggleButton.BorderSizePixel = 0 -- No border
 ToggleButton.Active = true
 ToggleButton.Draggable = true
 ToggleButton.Parent = ScreenGui
@@ -29,12 +28,10 @@ local ToggleLabel = Instance.new("TextLabel")
 ToggleLabel.Size = UDim2.new(1, 0, 1, 0)
 ToggleLabel.BackgroundTransparency = 1
 ToggleLabel.Text = "KrogHub"
-ToggleLabel.TextColor3 = Color3.fromRGB(200, 0, 0) -- Darker red text
-ToggleLabel.TextStrokeColor3 = Color3.fromRGB(200, 200, 200) -- Light gray stroke
-ToggleLabel.TextStrokeTransparency = 0
-ToggleLabel.TextSize = 13.6 -- Reduced by 15% from 16
+ToggleLabel.TextColor3 = Color3.fromRGB(255, 50, 50) -- Red text
+ToggleLabel.TextSize = 12 -- Smaller text
 ToggleLabel.Font = Enum.Font.SourceSansBold
-ToggleLabel.TextScaled = true
+ToggleLabel.TextScaled = false -- No scaling for cleaner look
 ToggleLabel.Parent = ToggleButton
 
 -- Main Frame
@@ -157,9 +154,25 @@ local UICornerItem = Instance.new("UICorner")
 UICornerItem.CornerRadius = UDim.new(0, 8)
 UICornerItem.Parent = ItemFrame
 
--- Category Tabs
+-- Item Title (Moved above CategoryFrame)
+local ItemTitle = Instance.new("TextLabel")
+ItemTitle.Size = UDim2.new(1, 0, 0, 20) -- Reduced height
+ItemTitle.Position = UDim2.new(0, 0, 0, 0) -- Moved to top
+ItemTitle.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+ItemTitle.Text = "Items"
+ItemTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+ItemTitle.TextSize = 16
+ItemTitle.Font = Enum.Font.SourceSansBold
+ItemTitle.Parent = ItemFrame
+
+local UICornerItemTitle = Instance.new("UICorner")
+UICornerItemTitle.CornerRadius = UDim.new(0, 8)
+UICornerItemTitle.Parent = ItemTitle
+
+-- Category Tabs (Moved below ItemTitle)
 local CategoryFrame = Instance.new("Frame")
 CategoryFrame.Size = UDim2.new(1, 0, 0, 30)
+CategoryFrame.Position = UDim2.new(0, 0, 0, 20) -- Moved down to avoid overlap
 CategoryFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 CategoryFrame.BorderSizePixel = 0
 CategoryFrame.Parent = ItemFrame
@@ -194,8 +207,8 @@ for i, category in ipairs(categories) do
 end
 
 local ItemScroll = Instance.new("ScrollingFrame")
-ItemScroll.Size = UDim2.new(1, -10, 1, -40)
-ItemScroll.Position = UDim2.new(0, 5, 0, 35)
+ItemScroll.Size = UDim2.new(1, -10, 1, -60) -- Adjusted for new ItemTitle and CategoryFrame positions
+ItemScroll.Position = UDim2.new(0, 5, 0, 50) -- Moved down
 ItemScroll.BackgroundTransparency = 1
 ItemScroll.ScrollBarThickness = 4
 ItemScroll.ScrollBarImageColor3 = Color3.fromRGB(150, 150, 150)
@@ -205,19 +218,6 @@ local ItemListLayout = Instance.new("UIListLayout")
 ItemListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 ItemListLayout.Padding = UDim.new(0, 5)
 ItemListLayout.Parent = ItemScroll
-
-local ItemTitle = Instance.new("TextLabel")
-ItemTitle.Size = UDim2.new(1, 0, 0, 30)
-ItemTitle.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-ItemTitle.Text = "Items"
-ItemTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
-ItemTitle.TextSize = 16
-ItemTitle.Font = Enum.Font.SourceSansBold
-ItemTitle.Parent = ItemFrame
-
-local UICornerItemTitle = Instance.new("UICorner")
-UICornerItemTitle.CornerRadius = UDim.new(0, 8)
-UICornerItemTitle.Parent = ItemTitle
 
 -- Variables
 local isMinimized = false
@@ -335,11 +335,67 @@ local function categorizeItem(item)
 end
 
 -- Function to update item list based on category
-local function updateItemelige
+local function updateItemList(player, category)
+    for _, v in pairs(ItemScroll:GetChildren()) do
+        if v:IsA("TextButton") then
+            v:Destroy()
+        end
+    end
+    local backpack = player:FindFirstChild("Backpack")
+    if backpack then
+        for _, item in pairs(backpack:GetChildren()) do
+            if item:IsA("Tool") and categorizeItem(item) == category then
+                local ItemButton = Instance.new("TextButton")
+                ItemButton.Size = UDim2.new(1, -10, 0, 30)
+                ItemButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                ItemButton.Text = item.Name
+                ItemButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+                ItemButton.TextSize = 14
+                ItemButton.Font = Enum.Font.SourceSans
+                ItemButton.Parent = ItemScroll
+                local UICornerItemBtn = Instance.new("UICorner")
+                UICornerItemBtn.CornerRadius = UDim.new(0, 5)
+                UICornerItemBtn.Parent = ItemButton
+                ItemButton.MouseButton1Click:Connect(function()
+                    local clonedItem = item:Clone()
+                    makePetVisible(clonedItem)
+                    clonedItem.Parent = LocalPlayer.Backpack
+                end)
+            end
+        end
+    end
+    ItemScroll.CanvasSize = UDim2.new(0, 0, 0, ItemListLayout.AbsoluteContentSize.Y)
+end
 
-ItemFrame.Visible = false
-MainFrame.Visible = false
-updateItemList(player, selectedCategory)
+-- Function to update player list
+local function updatePlayerList()
+    for _, v in pairs(PlayerScroll:GetChildren()) do
+        if v:IsA("TextButton") then
+            v:Destroy()
+        end
+    end
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local PlayerButton = Instance.new("TextButton")
+            PlayerButton.Size = UDim2.new(1, -10, 0, 30)
+            PlayerButton.BackgroundColor3 = Color3.fromRGB(60, 80, 100)
+            PlayerButton.Text = player.Name
+            PlayerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            PlayerButton.TextSize = 14
+            PlayerButton.Font = Enum.Font.SourceSans
+            PlayerButton.Parent = PlayerScroll
+            local UICornerPlayerBtn = Instance.new("UICorner")
+            UICornerPlayerBtn.CornerRadius = UDim.new(0, 5)
+            UICornerPlayerBtn.Parent = PlayerButton
+            PlayerButton.MouseButton1Click:Connect(function()
+                selectedPlayer = player
+                ItemTitle.Text = player.Name .. "'s " .. selectedCategory
+                ItemFrame.Visible = true
+                updateItemList(player, selectedCategory)
+            end)
+        end
+    end
+    PlayerScroll.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
 end
 
 -- Event Handlers
@@ -390,7 +446,7 @@ for category, button in pairs(categoryButtons) do
         end
         button.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
         if selectedPlayer then
-            ItemTitle.Text = selectedPlayer.Name .. "'s " .. category
+            ItemTitle.Text = player.Name .. "'s " .. category
             updateItemList(selectedPlayer, category)
         end
     end)
