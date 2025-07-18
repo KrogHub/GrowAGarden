@@ -1,4 +1,3 @@
--- KrogHub Script for Grow a Garden with Enhanced GUI and Item Categorization
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
@@ -9,14 +8,14 @@ ScreenGui.Name = "KrogHub"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
--- Toggle Button (Minimalistic)
+-- Toggle Button (Minimalistic, 20% larger, bold font)
 local ToggleButton = Instance.new("Frame")
-ToggleButton.Size = UDim2.new(0, 40, 0, 40) -- Smaller size for minimalism
+ToggleButton.Size = UDim2.new(0, 48, 0, 48) -- Increased by 20% from 40x40
 ToggleButton.Position = UDim2.new(0.05, 0, 0.05, 0)
 ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black background
 ToggleButton.BorderSizePixel = 0 -- No border
 ToggleButton.Active = true
-ToggleButton.Draggable = true
+ToggleButton.Draggable = true -- Already draggable
 ToggleButton.Parent = ScreenGui
 ToggleButton.ClipsDescendants = true
 
@@ -29,8 +28,8 @@ ToggleLabel.Size = UDim2.new(1, 0, 1, 0)
 ToggleLabel.BackgroundTransparency = 1
 ToggleLabel.Text = "KrogHub"
 ToggleLabel.TextColor3 = Color3.fromRGB(255, 50, 50) -- Red text
-ToggleLabel.TextSize = 12 -- Smaller text
-ToggleLabel.Font = Enum.Font.SourceSansBold
+ToggleLabel.TextSize = 14 -- Slightly larger for emphasis
+ToggleLabel.Font = Enum.Font.GothamBlack -- Bolder font for emphasis
 ToggleLabel.TextScaled = false -- No scaling for cleaner look
 ToggleLabel.Parent = ToggleButton
 
@@ -156,8 +155,8 @@ UICornerItem.Parent = ItemFrame
 
 -- Item Title (Moved above CategoryFrame)
 local ItemTitle = Instance.new("TextLabel")
-ItemTitle.Size = UDim2.new(1, 0, 0, 20) -- Reduced height
-ItemTitle.Position = UDim2.new(0, 0, 0, 0) -- Moved to top
+ItemTitle.Size = UDim2.new(1, 0, 0, 20)
+ItemTitle.Position = UDim2.new(0, 0, 0, 0)
 ItemTitle.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 ItemTitle.Text = "Items"
 ItemTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -172,7 +171,7 @@ UICornerItemTitle.Parent = ItemTitle
 -- Category Tabs (Moved below ItemTitle)
 local CategoryFrame = Instance.new("Frame")
 CategoryFrame.Size = UDim2.new(1, 0, 0, 30)
-CategoryFrame.Position = UDim2.new(0, 0, 0, 20) -- Moved down to avoid overlap
+CategoryFrame.Position = UDim2.new(0, 0, 0, 20)
 CategoryFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 CategoryFrame.BorderSizePixel = 0
 CategoryFrame.Parent = ItemFrame
@@ -190,7 +189,7 @@ CategoryLayout.Parent = CategoryFrame
 local categories = {"Pets", "Fruits", "Seeds", "Tools"}
 local categoryButtons = {}
 local selectedCategory = "Pets"
-local clonedItems = {} -- Table to track cloned items per player
+local clonedItems = {}
 
 -- Initialize clonedItems for each player
 for _, player in pairs(Players:GetPlayers()) do
@@ -213,8 +212,8 @@ for i, category in ipairs(categories) do
 end
 
 local ItemScroll = Instance.new("ScrollingFrame")
-ItemScroll.Size = UDim2.new(1, -10, 1, -60) -- Adjusted for new ItemTitle and CategoryFrame positions
-ItemScroll.Position = UDim2.new(0, 5, 0, 50) -- Moved down
+ItemScroll.Size = UDim2.new(1, -10, 1, -60)
+ItemScroll.Position = UDim2.new(0, 5, 0, 50)
 ItemScroll.BackgroundTransparency = 1
 ItemScroll.ScrollBarThickness = 4
 ItemScroll.ScrollBarImageColor3 = Color3.fromRGB(150, 150, 150)
@@ -233,7 +232,6 @@ local selectedPlayer = nil
 local function logToolDetails(tool, context)
     print("=== Debugging Tool: " .. tool.Name .. " (" .. context .. ") ===")
     
-    -- Check Age attribute or property
     local ageAttribute = tool:GetAttribute("Age")
     print("Age Attribute: " .. (ageAttribute and tostring(ageAttribute) or "Not found"))
     if tool:FindFirstChild("Age") then
@@ -242,7 +240,6 @@ local function logToolDetails(tool, context)
         print("Age Property: Not found")
     end
 
-    -- Log tool hierarchy
     print("Tool Hierarchy:")
     local function inspectObject(obj, indent)
         indent = indent or 0
@@ -261,7 +258,6 @@ local function logToolDetails(tool, context)
     end
     inspectObject(tool)
 
-    -- Check for scripts
     local scripts = {}
     for _, obj in pairs(tool:GetDescendants()) do
         if obj:IsA("BaseScript") then
@@ -277,7 +273,6 @@ local function logToolDetails(tool, context)
         end
     end
 
-    -- Check for PrimaryPart in Models
     for _, obj in pairs(tool:GetDescendants()) do
         if obj:IsA("Model") then
             print("Model: " .. obj.Name .. " PrimaryPart: " .. (obj.PrimaryPart and obj.PrimaryPart.Name or "None"))
@@ -351,7 +346,6 @@ local function updateItemList(player, category)
     if backpack then
         for _, item in pairs(backpack:GetChildren()) do
             if item:IsA("Tool") and categorizeItem(item) == category then
-                -- Skip items that have been cloned
                 if not clonedItems[player.Name][item.Name] then
                     local ItemButton = Instance.new("TextButton")
                     ItemButton.Size = UDim2.new(1, -10, 0, 30)
@@ -368,11 +362,8 @@ local function updateItemList(player, category)
                         local clonedItem = item:Clone()
                         makePetVisible(clonedItem)
                         clonedItem.Parent = LocalPlayer.Backpack
-                        -- Mark item as cloned
                         clonedItems[player.Name][item.Name] = true
-                        -- Remove the button from the list
                         ItemButton:Destroy()
-                        -- Update the list to reflect removal
                         updateItemList(player, category)
                     end)
                 end
@@ -462,7 +453,7 @@ for category, button in pairs(categoryButtons) do
         button.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
         if selectedPlayer then
             ItemTitle.Text = selectedPlayer.Name .. "'s " .. category
-            updateItemList(selectedPlayer, category) -- Update list on category change
+            updateItemList(selectedPlayer, category)
         end
     end)
 end
@@ -473,11 +464,11 @@ updatePlayerList()
 
 -- Update on player added/removed
 Players.PlayerAdded:Connect(function(player)
-    clonedItems[player.Name] = {} -- Initialize clonedItems for new player
+    clonedItems[player.Name] = {}
     updatePlayerList()
 end)
 Players.PlayerRemoving:Connect(function(player)
-    clonedItems[player.Name] = nil -- Remove clonedItems for leaving player
+    clonedItems[player.Name] = nil
     updatePlayerList()
 end)
 
