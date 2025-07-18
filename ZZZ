@@ -281,63 +281,6 @@ local function logToolDetails(tool, context)
     end
 end
 
--- Function to make pet models visible and non-collidable
-local function makePetVisible(tool)
-    if tool:IsA("Tool") then
-        logToolDetails(tool, "Cloned")
-        -- Disable any BodyMover objects to prevent physics interference
-        for _, obj in pairs(tool:GetDescendants()) do
-            if obj:IsA("BodyMover") then
-                obj:Destroy()
-                print("Destroyed BodyMover: " .. obj.Name .. " in tool: " .. tool.Name)
-            end
-        end
-        for _, part in pairs(tool:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.Transparency = 0
-                part.CanCollide = false
-                part.Anchored = true -- Anchor parts to prevent physics issues
-            elseif part:IsA("Model") and part.PrimaryPart then
-                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    part:SetPrimaryPartCFrame(LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3))
-                else
-                    print("Cannot position model: Character or HumanoidRootPart missing")
-                end
-            end
-        end
-        tool.Equipped:Connect(function()
-            print("Tool Equipped: " .. tool.Name)
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local rootPart = LocalPlayer.Character.HumanoidRootPart
-                for _, part in pairs(tool:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.Transparency = 0
-                        part.CanCollide = false
-                        part.Anchored = true -- Keep parts anchored when equipped
-                        part.CFrame = rootPart.CFrame * CFrame.new(0, 0, -3)
-                    elseif part:IsA("Model") and part.PrimaryPart then
-                        part:SetPrimaryPartCFrame(rootPart.CFrame * CFrame.new(0, 0, -3))
-                    end
-                end
-            else
-                print("Cannot position tool: Character or HumanoidRootPart missing")
-            end
-            logToolDetails(tool, "Equipped")
-        end)
-        tool.Unequipped:Connect(function()
-            print("Tool Unequipped: " .. tool.Name)
-            for _, part in pairs(tool:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.Transparency = 0
-                    part.CanCollide = false
-                    part.Anchored = true -- Keep parts anchored when unequipped
-                end
-            end
-            logToolDetails(tool, "Unequipped")
-        end)
-    end
-end
-
 -- Function to categorize items
 local function categorizeItem(item)
     local name = string.lower(item.Name)
@@ -377,7 +320,6 @@ local function updateItemList(player, category)
                     UICornerItemBtn.Parent = ItemButton
                     ItemButton.MouseButton1Click:Connect(function()
                         local clonedItem = item:Clone()
-                        makePetVisible(clonedItem)
                         clonedItem.Parent = LocalPlayer.Backpack
                         clonedItems[player.Name][item.Name] = true
                         ItemButton:Destroy()
@@ -490,7 +432,7 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 
 -- Monitor Backpack for debugging
-LocalPlayer.Backpack.ChildAdded:Connect(function child)
+LocalPlayer.Backpack.ChildAdded:Connect(function(child)
     if child:IsA("Tool") then
         print("New tool added to local Backpack: " .. child.Name)
         logToolDetails(child, "New Tool")
