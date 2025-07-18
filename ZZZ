@@ -190,6 +190,12 @@ CategoryLayout.Parent = CategoryFrame
 local categories = {"Pets", "Fruits", "Seeds", "Tools"}
 local categoryButtons = {}
 local selectedCategory = "Pets"
+local clonedItems = {} -- Table to track cloned items per player
+
+-- Initialize clonedItems for each player
+for _, player in pairs(Players:GetPlayers()) do
+    clonedItems[player.Name] = {}
+end
 
 for i, category in ipairs(categories) do
     local CategoryButton = Instance.new("TextButton")
@@ -345,22 +351,31 @@ local function updateItemList(player, category)
     if backpack then
         for _, item in pairs(backpack:GetChildren()) do
             if item:IsA("Tool") and categorizeItem(item) == category then
-                local ItemButton = Instance.new("TextButton")
-                ItemButton.Size = UDim2.new(1, -10, 0, 30)
-                ItemButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-                ItemButton.Text = item.Name
-                ItemButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-                ItemButton.TextSize = 14
-                ItemButton.Font = Enum.Font.SourceSans
-                ItemButton.Parent = ItemScroll
-                local UICornerItemBtn = Instance.new("UICorner")
-                UICornerItemBtn.CornerRadius = UDim.new(0, 5)
-                UICornerItemBtn.Parent = ItemButton
-                ItemButton.MouseButton1Click:Connect(function()
-                    local clonedItem = item:Clone()
-                    makePetVisible(clonedItem)
-                    clonedItem.Parent = LocalPlayer.Backpack
-                end)
+                -- Skip items that have been cloned
+                if not clonedItems[player.Name][item.Name] then
+                    local ItemButton = Instance.new("TextButton")
+                    ItemButton.Size = UDim2.new(1, -10, 0, 30)
+                    ItemButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                    ItemButton.Text = item.Name
+                    ItemButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    ItemButton.TextSize = 14
+                    ItemButton.Font = Enum.Font.SourceSans
+                    ItemButton.Parent = ItemScroll
+                    local UICornerItemBtn = Instance.new("UICorner")
+                    UICornerItemBtn.CornerRadius = UDim.new(0, 5)
+                    UICornerItemBtn.Parent = ItemButton
+                    ItemButton.MouseButton1Click:Connect(function()
+                        local clonedItem = item:Clone()
+                        makePetVisible(clonedItem)
+                        clonedItem.Parent = LocalPlayer.Backpack
+                        -- Mark item as cloned
+                        clonedItems[player.Name][item.Name] = true
+                        -- Remove the button from the list
+                        ItemButton:Destroy()
+                        -- Update the list to reflect removal
+                        updateItemList(player, category)
+                    end)
+                end
             end
         end
     end
@@ -446,8 +461,8 @@ for category, button in pairs(categoryButtons) do
         end
         button.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
         if selectedPlayer then
-            ItemTitle.Text = player.Name .. "'s " .. category
-            updateItemList(selectedPlayer, category)
+            ItemTitle.Text = selectedPlayer.Name .. "'s " .. category
+            updateItemList(selectedPlayer, category) -- Update list on category change
         end
     end)
 end
@@ -457,8 +472,14 @@ categoryButtons["Pets"].BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 updatePlayerList()
 
 -- Update on player added/removed
-Players.PlayerAdded:Connect(updatePlayerList)
-Players.PlayerRemoving:Connect(updatePlayerList)
+Players.PlayerAdded:Connect(function(player)
+    clonedItems[player.Name] = {} -- Initialize clonedItems for new player
+    updatePlayerList()
+end)
+Players.PlayerRemoving:Connect(function(player)
+    clonedItems[player.Name] = nil -- Remove clonedItems for leaving player
+    updatePlayerList()
+end)
 
 -- Monitor Backpack for debugging
 LocalPlayer.Backpack.ChildAdded:Connect(function(child)
