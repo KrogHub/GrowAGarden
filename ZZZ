@@ -284,9 +284,14 @@ end
 -- Function to categorize items
 local function categorizeItem(item)
     local name = string.lower(item.Name)
+    local fruitKeywords = {"kg", "bloodlit", "shocked", "clay", "moonlit", "windstruck", "wet", "frozen"}
     if string.find(name, "age") and string.find(name, "kg") then
         return "Pets"
-    elseif string.find(name, "kg") then
+    elseif table.find(fruitKeywords, name) or string.find(name, "kg") or 
+           string.find(name, "bloodlit") or string.find(name, "shocked") or 
+           string.find(name, "clay") or string.find(name, "moonlit") or 
+           string.find(name, "windstruck") or string.find(name, "wet") or 
+           string.find(name, "frozen") then
         return "Fruits"
     elseif string.find(name, "seed") then
         return "Seeds"
