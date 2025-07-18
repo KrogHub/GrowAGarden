@@ -10,11 +10,11 @@ ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 -- Toggle Button (Larger size to fit "KrogHub", dark red border)
 local ToggleButton = Instance.new("Frame")
-ToggleButton.Size = UDim2.new(0, 60, 0, 60) -- Increased to fit "KrogHub"
+ToggleButton.Size = UDim2.new(0, 60, 0, 60)
 ToggleButton.Position = UDim2.new(0.05, 0, 0.05, 0)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black background
-ToggleButton.BorderSizePixel = 2 -- Dark red border
-ToggleButton.BorderColor3 = Color3.fromRGB(139, 0, 0) -- Dark red
+ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ToggleButton.BorderSizePixel = 2
+ToggleButton.BorderColor3 = Color3.fromRGB(139, 0, 0)
 ToggleButton.Active = true
 ToggleButton.Draggable = true
 ToggleButton.Parent = ScreenGui
@@ -28,9 +28,9 @@ local ToggleLabel = Instance.new("TextLabel")
 ToggleLabel.Size = UDim2.new(1, 0, 1, 0)
 ToggleLabel.BackgroundTransparency = 1
 ToggleLabel.Text = "KrogHub"
-ToggleLabel.TextColor3 = Color3.fromRGB(255, 50, 50) -- Red text
+ToggleLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
 ToggleLabel.TextSize = 14
-ToggleLabel.Font = Enum.Font.GothamBlack -- Bold font
+ToggleLabel.Font = Enum.Font.GothamBlack
 ToggleLabel.TextScaled = false
 ToggleLabel.Parent = ToggleButton
 
@@ -285,14 +285,24 @@ end
 local function makePetVisible(tool)
     if tool:IsA("Tool") then
         logToolDetails(tool, "Cloned")
+        -- Disable any BodyMover objects to prevent physics interference
+        for _, obj in pairs(tool:GetDescendants()) do
+            if obj:IsA("BodyMover") then
+                obj:Destroy()
+                print("Destroyed BodyMover: " .. obj.Name .. " in tool: " .. tool.Name)
+            end
+        end
         for _, part in pairs(tool:GetDescendants()) do
             if part:IsA("BasePart") then
                 part.Transparency = 0
-                part.CanCollide = false -- Ensure no collisions
-                part.Anchored = false
+                part.CanCollide = false
+                part.Anchored = true -- Anchor parts to prevent physics issues
             elseif part:IsA("Model") and part.PrimaryPart then
-                part:SetPrimaryPartCFrame(LocalPlayer.Character and LocalPlayer.Character.HumanoidRootPart and 
-                    LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3) or CFrame.new(0, 0, 0))
+                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    part:SetPrimaryPartCFrame(LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3))
+                else
+                    print("Cannot position model: Character or HumanoidRootPart missing")
+                end
             end
         end
         tool.Equipped:Connect(function()
@@ -302,12 +312,15 @@ local function makePetVisible(tool)
                 for _, part in pairs(tool:GetDescendants()) do
                     if part:IsA("BasePart") then
                         part.Transparency = 0
-                        part.CanCollide = false -- Ensure no collisions when equipped
+                        part.CanCollide = false
+                        part.Anchored = true -- Keep parts anchored when equipped
                         part.CFrame = rootPart.CFrame * CFrame.new(0, 0, -3)
                     elseif part:IsA("Model") and part.PrimaryPart then
                         part:SetPrimaryPartCFrame(rootPart.CFrame * CFrame.new(0, 0, -3))
                     end
                 end
+            else
+                print("Cannot position tool: Character or HumanoidRootPart missing")
             end
             logToolDetails(tool, "Equipped")
         end)
@@ -316,7 +329,8 @@ local function makePetVisible(tool)
             for _, part in pairs(tool:GetDescendants()) do
                 if part:IsA("BasePart") then
                     part.Transparency = 0
-                    part.CanCollide = false -- Ensure no collisions when unequipped
+                    part.CanCollide = false
+                    part.Anchored = true -- Keep parts anchored when unequipped
                 end
             end
             logToolDetails(tool, "Unequipped")
@@ -476,7 +490,7 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 
 -- Monitor Backpack for debugging
-LocalPlayer.Backpack.ChildAdded:Connect(function(child)
+LocalPlayer.Backpack.ChildAdded:Connect(function child)
     if child:IsA("Tool") then
         print("New tool added to local Backpack: " .. child.Name)
         logToolDetails(child, "New Tool")
