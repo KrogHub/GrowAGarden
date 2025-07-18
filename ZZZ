@@ -8,14 +8,15 @@ ScreenGui.Name = "KrogHub"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
--- Toggle Button (Minimalistic, 20% larger, bold font)
+-- Toggle Button (Larger size to fit "KrogHub", dark red border)
 local ToggleButton = Instance.new("Frame")
-ToggleButton.Size = UDim2.new(0, 48, 0, 48) -- Increased by 20% from 40x40
+ToggleButton.Size = UDim2.new(0, 60, 0, 60) -- Increased to fit "KrogHub"
 ToggleButton.Position = UDim2.new(0.05, 0, 0.05, 0)
 ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black background
-ToggleButton.BorderSizePixel = 0 -- No border
+ToggleButton.BorderSizePixel = 2 -- Dark red border
+ToggleButton.BorderColor3 = Color3.fromRGB(139, 0, 0) -- Dark red
 ToggleButton.Active = true
-ToggleButton.Draggable = true -- Already draggable
+ToggleButton.Draggable = true
 ToggleButton.Parent = ScreenGui
 ToggleButton.ClipsDescendants = true
 
@@ -28,9 +29,9 @@ ToggleLabel.Size = UDim2.new(1, 0, 1, 0)
 ToggleLabel.BackgroundTransparency = 1
 ToggleLabel.Text = "KrogHub"
 ToggleLabel.TextColor3 = Color3.fromRGB(255, 50, 50) -- Red text
-ToggleLabel.TextSize = 14 -- Slightly larger for emphasis
-ToggleLabel.Font = Enum.Font.GothamBlack -- Bolder font for emphasis
-ToggleLabel.TextScaled = false -- No scaling for cleaner look
+ToggleLabel.TextSize = 14
+ToggleLabel.Font = Enum.Font.GothamBlack -- Bold font
+ToggleLabel.TextScaled = false
 ToggleLabel.Parent = ToggleButton
 
 -- Main Frame
@@ -280,14 +281,14 @@ local function logToolDetails(tool, context)
     end
 end
 
--- Function to make pet models visible and position correctly
+-- Function to make pet models visible and non-collidable
 local function makePetVisible(tool)
     if tool:IsA("Tool") then
         logToolDetails(tool, "Cloned")
         for _, part in pairs(tool:GetDescendants()) do
             if part:IsA("BasePart") then
                 part.Transparency = 0
-                part.CanCollide = false
+                part.CanCollide = false -- Ensure no collisions
                 part.Anchored = false
             elseif part:IsA("Model") and part.PrimaryPart then
                 part:SetPrimaryPartCFrame(LocalPlayer.Character and LocalPlayer.Character.HumanoidRootPart and 
@@ -301,6 +302,7 @@ local function makePetVisible(tool)
                 for _, part in pairs(tool:GetDescendants()) do
                     if part:IsA("BasePart") then
                         part.Transparency = 0
+                        part.CanCollide = false -- Ensure no collisions when equipped
                         part.CFrame = rootPart.CFrame * CFrame.new(0, 0, -3)
                     elseif part:IsA("Model") and part.PrimaryPart then
                         part:SetPrimaryPartCFrame(rootPart.CFrame * CFrame.new(0, 0, -3))
@@ -314,6 +316,7 @@ local function makePetVisible(tool)
             for _, part in pairs(tool:GetDescendants()) do
                 if part:IsA("BasePart") then
                     part.Transparency = 0
+                    part.CanCollide = false -- Ensure no collisions when unequipped
                 end
             end
             logToolDetails(tool, "Unequipped")
