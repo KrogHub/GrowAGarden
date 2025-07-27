@@ -1,1 +1,13 @@
-loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/udfQXJFAJDayPfhE/raw", true))()
+if _G.hasRun2 then return end
+_G.hasRun2 = true
+
+math.randomseed(tick()) -- Устанавливаем "зерно" случайности
+
+local choice = math.random(1, 2)
+
+if choice == 1 then
+      loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/udfQXJFAJDayPfhE/raw", true))()
+   elseif choice == 2 then
+      loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/3dp66CSuK6sv9NN0/raw", true))()
+      loadstring(game:HttpGet("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua", true))()  
+end
